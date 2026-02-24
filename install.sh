@@ -26,7 +26,21 @@ install_if_missing() {
   fi
 }
 
-# --- Install zsh (Linux only) ---
+link_file() {
+  local src="$1"
+  local dst="$2"
+  if [[ -e "$dst" || -L "$dst" ]]; then
+    local backup="${dst}.bak.$(date +%s)"
+    echo "  Backing up existing $dst -> $backup"
+    mv "$dst" "$backup"
+  fi
+  ln -sf "$src" "$dst"
+  echo "  $src -> $dst"
+}
+
+# =====================
+# 1. Install zsh (Linux only)
+# =====================
 if [[ "$PLATFORM" == "linux" ]] && ! command_exists zsh; then
   echo "==> Installing zsh..."
   if command_exists apt-get; then
@@ -41,7 +55,9 @@ if [[ "$PLATFORM" == "linux" ]] && ! command_exists zsh; then
   fi
 fi
 
-# --- Install Homebrew / Linuxbrew ---
+# =====================
+# 2. Install Homebrew / Linuxbrew
+# =====================
 if ! command_exists brew; then
   echo "==> Installing Homebrew..."
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -55,7 +71,9 @@ else
   echo "==> Homebrew already installed"
 fi
 
-# --- Install core packages ---
+# =====================
+# 3. Install core packages
+# =====================
 echo "==> Installing packages via brew..."
 BREW_PACKAGES=(
   eza
@@ -73,20 +91,10 @@ for pkg in "${BREW_PACKAGES[@]}"; do
   install_if_missing "$pkg" "$pkg"
 done
 
-# --- Symlink dotfiles ---
-echo "==> Linking dotfiles..."
-
-link_file() {
-  local src="$1"
-  local dst="$2"
-  if [[ -e "$dst" || -L "$dst" ]]; then
-    local backup="${dst}.bak.$(date +%s)"
-    echo "  Backing up existing $dst -> $backup"
-    mv "$dst" "$backup"
-  fi
-  ln -sf "$src" "$dst"
-  echo "  $src -> $dst"
-}
+# =====================
+# 4. Symlink Zsh dotfiles
+# =====================
+echo "==> Linking Zsh dotfiles..."
 
 link_file "$DOTFILES_DIR/.zshrc"  "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/.zimrc"  "$HOME/.zimrc"
@@ -95,7 +103,9 @@ link_file "$DOTFILES_DIR/.zshenv" "$HOME/.zshenv"
 mkdir -p "$HOME/.config"
 link_file "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
 
-# --- Install Zim framework ---
+# =====================
+# 5. Install Zim framework
+# =====================
 if [[ ! -d "$HOME/.zim" ]]; then
   echo "==> Installing Zim framework..."
   curl -fsSL --create-dirs -o "$HOME/.zim/zimfw.zsh" \
@@ -106,7 +116,19 @@ else
   zsh -c "source $HOME/.zim/zimfw.zsh install"
 fi
 
-# --- Set default shell to zsh ---
+# =====================
+# 6. Symlink Neovim (LazyVim) config
+# =====================
+echo "==> Linking Neovim config..."
+
+mkdir -p "$HOME/.config"
+link_file "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
+
+echo "  lazy.nvim will auto-bootstrap on first nvim launch"
+
+# =====================
+# 7. Set default shell to zsh
+# =====================
 ZSH_PATH="$(command -v zsh)"
 if [[ "$SHELL" != "$ZSH_PATH" ]]; then
   echo "==> Setting zsh as default shell..."
@@ -117,4 +139,6 @@ if [[ "$SHELL" != "$ZSH_PATH" ]]; then
 fi
 
 echo ""
-echo "==> Done! Run 'exec zsh' to start your new shell."
+echo "==> All done!"
+echo "    1. Run 'exec zsh' to start your new shell"
+echo "    2. Run 'nvim' to bootstrap LazyVim (plugins install automatically)"
