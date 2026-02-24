@@ -1,6 +1,10 @@
 return {
   {
     "3rd/image.nvim",
+    enabled = vim.env.TERM == "xterm-kitty"
+      or vim.env.TERM_PROGRAM == "kitty"
+      or vim.env.TERM_PROGRAM == "ghostty"
+      or vim.env.TERM == "xterm-ghostty",
     opts = {
       backend = "kitty",
       processor = "magick_cli",
