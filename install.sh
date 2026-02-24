@@ -86,6 +86,10 @@ BREW_PACKAGES=(
   tmux
   starship
   git
+  imagemagick
+  luarocks
+  nmap
+  proxychains-ng
 )
 for pkg in "${BREW_PACKAGES[@]}"; do
   install_if_missing "$pkg" "$pkg"
