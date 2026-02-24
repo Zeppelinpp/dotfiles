@@ -59,6 +59,11 @@ alias lg="lazygit"
 alias nv="nvim"
 alias cc="claude --dangerously-skip-permissions"
 alias reload="exec zsh"
+alias pc='proxychains4 -q'
+alias proxyon='export https_proxy=socks5h://127.0.0.1:1080 http_proxy=socks5h://127.0.0.1:1080'
+alias proxyoff='unset https_proxy http_proxy'
+
+export PROXYCHAINS_QUIET_MODE=1
 
 if (( ${+commands[eza]} )); then
   alias ls="eza --icons"
