@@ -102,6 +102,7 @@ link_file "$DOTFILES_DIR/.zshenv" "$HOME/.zshenv"
 
 mkdir -p "$HOME/.config"
 link_file "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
+link_file "$DOTFILES_DIR/.tmux.conf"    "$HOME/.tmux.conf"
 
 # =====================
 # 5. Install Zim framework
