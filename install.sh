@@ -106,14 +106,15 @@ link_file "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
 # =====================
 # 5. Install Zim framework
 # =====================
-if [[ ! -d "$HOME/.zim" ]]; then
+ZIM_HOME="$HOME/.zim"
+if [[ ! -d "$ZIM_HOME" ]]; then
   echo "==> Installing Zim framework..."
-  curl -fsSL --create-dirs -o "$HOME/.zim/zimfw.zsh" \
+  curl -fsSL --create-dirs -o "$ZIM_HOME/zimfw.zsh" \
     https://github.com/zimfw/zimfw/releases/latest/download/zimfw.zsh
-  zsh -c "source $HOME/.zim/zimfw.zsh init && source $HOME/.zim/zimfw.zsh install"
+  zsh -c "ZIM_HOME=$ZIM_HOME source $ZIM_HOME/zimfw.zsh init && source $ZIM_HOME/zimfw.zsh install"
 else
   echo "==> Zim already installed, updating modules..."
-  zsh -c "source $HOME/.zim/zimfw.zsh install"
+  zsh -c "ZIM_HOME=$ZIM_HOME source $ZIM_HOME/zimfw.zsh install"
 fi
 
 # =====================
