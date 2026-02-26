@@ -66,6 +66,81 @@ EOF
   } >> "$zsh_local"
 }
 
+ensure_claude_statusline_config() {
+  local claude_dir="$HOME/.claude"
+  local settings_file="$claude_dir/settings.json"
+  local statusline_cmd="$HOME/Documents/cc-statusline/statusline.sh"
+
+  mkdir -p "$claude_dir"
+
+  if [[ -f "$statusline_cmd" ]]; then
+    chmod +x "$statusline_cmd" 2>/dev/null || true
+  else
+    echo "  Warning: $statusline_cmd not found yet; statusLine will still be configured."
+  fi
+
+  if ! command_exists python3; then
+    echo "  Warning: python3 not found, skipping Claude statusLine config update."
+    return 0
+  fi
+
+  python3 - "$settings_file" "$statusline_cmd" <<'PY'
+import json
+import pathlib
+import sys
+from json import JSONDecodeError
+
+settings_path = pathlib.Path(sys.argv[1])
+statusline_cmd = sys.argv[2]
+
+config = {}
+if settings_path.exists():
+    try:
+        config = json.loads(settings_path.read_text(encoding="utf-8"))
+        if not isinstance(config, dict):
+            config = {}
+    except JSONDecodeError:
+        backup = settings_path.with_suffix(settings_path.suffix + ".bak")
+        settings_path.rename(backup)
+        config = {}
+
+config["statusLine"] = {
+    "type": "command",
+    "command": statusline_cmd,
+}
+
+settings_path.write_text(
+    json.dumps(config, indent=2, ensure_ascii=True) + "\n",
+    encoding="utf-8",
+)
+PY
+}
+
+sync_cc_statusline_files() {
+  local src_dir="$DOTFILES_DIR/cc-statusline"
+  local dst_dir="$HOME/Documents/cc-statusline"
+
+  if [[ ! -d "$src_dir" ]]; then
+    echo "  Warning: $src_dir not found, skipping statusline file sync."
+    return 0
+  fi
+
+  mkdir -p "$dst_dir"
+
+  if [[ -f "$src_dir/ccr-statusline.ts" ]]; then
+    cp "$src_dir/ccr-statusline.ts" "$dst_dir/ccr-statusline.ts"
+  else
+    echo "  Warning: $src_dir/ccr-statusline.ts not found."
+  fi
+
+  if [[ -f "$src_dir/statusline.sh" ]]; then
+    cp "$src_dir/statusline.sh" "$dst_dir/statusline.sh"
+    chmod +x "$dst_dir/statusline.sh" 2>/dev/null || true
+  else
+    echo "  Warning: $src_dir/statusline.sh not found."
+  fi
+}
+
 install_if_missing() {
   local cmd="$1"
   local pkg="${2:-$1}"
@@ -194,6 +269,18 @@ if [[ "$SHELL" != "$ZSH_PATH" ]]; then
   fi
   sudo chsh -s "$ZSH_PATH" "$(whoami)" 2>/dev/null || chsh -s "$ZSH_PATH" 2>/dev/null || true
 fi
+
+# =====================
+# 8. Sync Claude status line scripts
+# =====================
+echo "==> Syncing Claude status line scripts..."
+sync_cc_statusline_files
+
+# =====================
+# 9. Configure Claude status line
+# =====================
+echo "==> Configuring Claude status line..."
+ensure_claude_statusline_config
 
 echo ""
 echo "==> All done!"
