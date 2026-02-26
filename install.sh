@@ -15,6 +15,57 @@ echo "==> Detected platform: $PLATFORM"
 # --- Helper ---
 command_exists() { command -v "$1" &>/dev/null; }
 
+setup_brew_shellenv() {
+  local brew_bin=""
+
+  if [[ "$PLATFORM" == "macos" ]]; then
+    if [[ -x "/opt/homebrew/bin/brew" ]]; then
+      brew_bin="/opt/homebrew/bin/brew"
+    elif [[ -x "/usr/local/bin/brew" ]]; then
+      brew_bin="/usr/local/bin/brew"
+    fi
+  else
+    if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+      brew_bin="/home/linuxbrew/.linuxbrew/bin/brew"
+    fi
+  fi
+
+  if [[ -z "$brew_bin" ]]; then
+    return 1
+  fi
+
+  eval "$("$brew_bin" shellenv)"
+}
+
+ensure_brew_in_zsh_local() {
+  local zsh_local="$HOME/.zshrc.local"
+  local marker="# Added by dotfiles install: Homebrew shellenv"
+
+  if [[ -f "$zsh_local" ]] && grep -Fq "$marker" "$zsh_local"; then
+    return 0
+  fi
+
+  {
+    echo ""
+    echo "$marker"
+    if [[ "$PLATFORM" == "macos" ]]; then
+      cat <<'EOF'
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+EOF
+    else
+      cat <<'EOF'
+if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+EOF
+    fi
+  } >> "$zsh_local"
+}
+
 install_if_missing() {
   local cmd="$1"
   local pkg="${2:-$1}"
@@ -61,14 +112,13 @@ fi
 if ! command_exists brew; then
   echo "==> Installing Homebrew..."
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-  if [[ "$PLATFORM" == "macos" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"
-  else
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  fi
 else
   echo "==> Homebrew already installed"
+fi
+
+if ! setup_brew_shellenv; then
+  echo "Failed to initialize Homebrew shellenv. Please check brew installation path."
+  exit 1
 fi
 
 # =====================
@@ -103,6 +153,7 @@ echo "==> Linking Zsh dotfiles..."
 link_file "$DOTFILES_DIR/.zshrc"  "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/.zimrc"  "$HOME/.zimrc"
 link_file "$DOTFILES_DIR/.zshenv" "$HOME/.zshenv"
+ensure_brew_in_zsh_local
 
 mkdir -p "$HOME/.config"
 link_file "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
