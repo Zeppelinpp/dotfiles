@@ -1,5 +1,7 @@
 # Zsh configuration {{{
 
+export TERM=xterm-256color
+
 setopt HIST_IGNORE_ALL_DUPS
 
 bindkey -e
@@ -102,3 +104,4 @@ frg() {
 
 # Source local overrides (machine-specific config)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+export PATH="$HOME/.cargo/bin:$PATH"

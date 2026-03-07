@@ -15,6 +15,42 @@ echo "==> Detected platform: $PLATFORM"
 # --- Helper ---
 command_exists() { command -v "$1" &>/dev/null; }
 
+# =====================
+# 0. Install system dependencies and Rust (first)
+# =====================
+
+# Detect Linux distro and install build dependencies
+if [[ "$PLATFORM" == "linux" ]]; then
+  if command_exists apt-get; then
+    echo "==> Detected Debian/Ubuntu system, installing build dependencies..."
+    sudo apt-get update
+    sudo apt-get install -y clang libclang-dev build-essential pkg-config
+  elif command_exists yum; then
+    echo "==> Detected CentOS/RHEL system, installing build dependencies..."
+    sudo yum groupinstall -y "Development Tools"
+    sudo yum install -y clang clang-devel pkgconfig
+  elif command_exists dnf; then
+    echo "==> Detected CentOS/RHEL 8+ system, installing build dependencies..."
+    sudo dnf groupinstall -y "Development Tools"
+    sudo dnf install -y clang clang-devel pkgconfig
+  else
+    echo "==> Warning: Unknown package manager, skipping system dependency installation"
+  fi
+fi
+
+# Check and install Rust
+if ! command_exists cargo; then
+  echo "==> Rust not found, installing via rustup..."
+  curl https://sh.rustup.rs -sSf | sh -s -- -y
+  source "$HOME/.cargo/env"
+else
+  echo "==> Rust already installed"
+fi
+
+# Install tree-sitter-cli
+echo "==> Installing tree-sitter-cli..."
+cargo install tree-sitter-cli
+
 setup_brew_shellenv() {
   local brew_bin=""
 
