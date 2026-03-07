@@ -51,6 +51,14 @@ fi
 echo "==> Installing tree-sitter-cli..."
 cargo install tree-sitter-cli
 
+# Install uv (Python package manager)
+if ! command_exists uv; then
+  echo "==> Installing uv..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+else
+  echo "==> uv already installed"
+fi
+
 setup_brew_shellenv() {
   local brew_bin=""
 
