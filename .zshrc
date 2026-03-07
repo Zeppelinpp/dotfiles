@@ -45,9 +45,9 @@ export EDITOR='nvim'
 export VISUAL='nvim'
 
 # PATH
-[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
 [[ -d "$HOME/.cargo/bin" ]] && export PATH="$HOME/.cargo/bin:$PATH"
 [[ -d "$HOME/.bun/bin" ]] && export PATH="$HOME/.bun/bin:$PATH"
+[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
 
 # Alias
 alias gs="git status"
@@ -64,12 +64,10 @@ alias reload="exec zsh"
 alias pc='proxychains4 -q'
 alias proxyon='export HTTP_PROXY=socks5h://127.0.0.1:1080 HTTPS_PROXY=socks5h://127.0.0.1:1080 ALL_PROXY=socks5h://127.0.0.1:1080 http_proxy=socks5h://127.0.0.1:1080 https_proxy=socks5h://127.0.0.1:1080 all_proxy=socks5h://127.0.0.1:1080; unset NO_PROXY no_proxy'
 alias proxyoff='unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy NO_PROXY no_proxy'
-alias proxyoff='unset https_proxy http_proxy'
 alias kimi="export ANTHROPIC_BASE_URL=https://api.kimi.com/coding/ ANTHROPIC_API_KEY=sk-kimi-kWeSxen5qsT6BhHsfgp1XhQfVmd7jq1KA4SrrQH4qZxpE54yJ2uCP7lh5yRdOBUY"
 # alias claude="proxychains4 claude"
 
 export PROXYCHAINS_QUIET_MODE=1
-export PATH="$HOME/.cargo/bin:$PATH"
 
 if (( ${+commands[eza]} )); then
   alias ls="eza --icons"
@@ -104,4 +102,3 @@ frg() {
 
 # Source local overrides (machine-specific config)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-export PATH="$HOME/.cargo/bin:$PATH"
