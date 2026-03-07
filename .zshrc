@@ -60,7 +60,8 @@ alias nv="nvim"
 alias cc="claude --dangerously-skip-permissions"
 alias reload="exec zsh"
 alias pc='proxychains4 -q'
-alias proxyon='export https_proxy=socks5h://127.0.0.1:1080 http_proxy=socks5h://127.0.0.1:1080'
+alias proxyon='export HTTP_PROXY=socks5h://127.0.0.1:1080 HTTPS_PROXY=socks5h://127.0.0.1:1080 ALL_PROXY=socks5h://127.0.0.1:1080 http_proxy=socks5h://127.0.0.1:1080 https_proxy=socks5h://127.0.0.1:1080 all_proxy=socks5h://127.0.0.1:1080; unset NO_PROXY no_proxy'
+alias proxyoff='unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy NO_PROXY no_proxy'
 alias proxyoff='unset https_proxy http_proxy'
 alias kimi="export ANTHROPIC_BASE_URL=https://api.kimi.com/coding/ ANTHROPIC_API_KEY=sk-kimi-kWeSxen5qsT6BhHsfgp1XhQfVmd7jq1KA4SrrQH4qZxpE54yJ2uCP7lh5yRdOBUY"
 # alias claude="proxychains4 claude"
