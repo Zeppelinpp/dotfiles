@@ -6,7 +6,7 @@ return {
     lazy = false,
     opts = {
       server = {
-        dcfault_settings = {
+        default_settings = {
           -- 这里就是原来的 rust-analyzer 配置区
           ["rust-analyzer"] = {
             -- 【保留你之前的配置】
