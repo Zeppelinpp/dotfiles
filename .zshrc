@@ -63,9 +63,10 @@ alias pc='proxychains4 -q'
 alias proxyon='export https_proxy=socks5h://127.0.0.1:1080 http_proxy=socks5h://127.0.0.1:1080'
 alias proxyoff='unset https_proxy http_proxy'
 alias kimi="export ANTHROPIC_BASE_URL=https://api.kimi.com/coding/ ANTHROPIC_API_KEY=sk-kimi-kWeSxen5qsT6BhHsfgp1XhQfVmd7jq1KA4SrrQH4qZxpE54yJ2uCP7lh5yRdOBUY"
-alias claude="proxychains4 claude"
+# alias claude="proxychains4 claude"
 
 export PROXYCHAINS_QUIET_MODE=1
+export PATH="$HOME/.cargo/bin:$PATH"
 
 if (( ${+commands[eza]} )); then
   alias ls="eza --icons"
