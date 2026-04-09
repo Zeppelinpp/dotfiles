@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# --- Self-cloning for remote execution ---
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [[ ! -d "$DOTFILES_DIR/nvim" ]]; then
+  echo "==> Dotfiles repo not found locally, cloning..."
+  DOTFILES_DIR="$HOME/.dotfiles"
+  if [[ ! -d "$DOTFILES_DIR/.git" ]]; then
+    git clone https://github.com/Zeppelinpp/dotfiles.git "$DOTFILES_DIR" || true
+  fi
+fi
 
 # --- OS detection ---
 OS="$(uname -s)"
@@ -14,50 +22,6 @@ echo "==> Detected platform: $PLATFORM"
 
 # --- Helper ---
 command_exists() { command -v "$1" &>/dev/null; }
-
-# =====================
-# 0. Install system dependencies and Rust (first)
-# =====================
-
-# Detect Linux distro and install build dependencies
-if [[ "$PLATFORM" == "linux" ]]; then
-  if command_exists apt-get; then
-    echo "==> Detected Debian/Ubuntu system, installing build dependencies..."
-    sudo apt-get update
-    sudo apt-get install -y clang libclang-dev build-essential pkg-config
-  elif command_exists yum; then
-    echo "==> Detected CentOS/RHEL system, installing build dependencies..."
-    sudo yum groupinstall -y "Development Tools"
-    sudo yum install -y clang clang-devel pkgconfig
-  elif command_exists dnf; then
-    echo "==> Detected CentOS/RHEL 8+ system, installing build dependencies..."
-    sudo dnf groupinstall -y "Development Tools"
-    sudo dnf install -y clang clang-devel pkgconfig
-  else
-    echo "==> Warning: Unknown package manager, skipping system dependency installation"
-  fi
-fi
-
-# Check and install Rust
-if ! command_exists cargo; then
-  echo "==> Rust not found, installing via rustup..."
-  curl https://sh.rustup.rs -sSf | sh -s -- -y
-  source "$HOME/.cargo/env"
-else
-  echo "==> Rust already installed"
-fi
-
-# Install tree-sitter-cli
-echo "==> Installing tree-sitter-cli..."
-cargo install tree-sitter-cli
-
-# Install uv (Python package manager)
-if ! command_exists uv; then
-  echo "==> Installing uv..."
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-else
-  echo "==> uv already installed"
-fi
 
 setup_brew_shellenv() {
   local brew_bin=""
@@ -110,81 +74,6 @@ EOF
   } >> "$zsh_local"
 }
 
-ensure_claude_statusline_config() {
-  local claude_dir="$HOME/.claude"
-  local settings_file="$claude_dir/settings.json"
-  local statusline_cmd="$HOME/Documents/cc-statusline/statusline.sh"
-
-  mkdir -p "$claude_dir"
-
-  if [[ -f "$statusline_cmd" ]]; then
-    chmod +x "$statusline_cmd" 2>/dev/null || true
-  else
-    echo "  Warning: $statusline_cmd not found yet; statusLine will still be configured."
-  fi
-
-  if ! command_exists python3; then
-    echo "  Warning: python3 not found, skipping Claude statusLine config update."
-    return 0
-  fi
-
-  python3 - "$settings_file" "$statusline_cmd" <<'PY'
-import json
-import pathlib
-import sys
-from json import JSONDecodeError
-
-settings_path = pathlib.Path(sys.argv[1])
-statusline_cmd = sys.argv[2]
-
-config = {}
-if settings_path.exists():
-    try:
-        config = json.loads(settings_path.read_text(encoding="utf-8"))
-        if not isinstance(config, dict):
-            config = {}
-    except JSONDecodeError:
-        backup = settings_path.with_suffix(settings_path.suffix + ".bak")
-        settings_path.rename(backup)
-        config = {}
-
-config["statusLine"] = {
-    "type": "command",
-    "command": statusline_cmd,
-}
-
-settings_path.write_text(
-    json.dumps(config, indent=2, ensure_ascii=True) + "\n",
-    encoding="utf-8",
-)
-PY
-}
-
-sync_cc_statusline_files() {
-  local src_dir="$DOTFILES_DIR/cc-statusline"
-  local dst_dir="$HOME/Documents/cc-statusline"
-
-  if [[ ! -d "$src_dir" ]]; then
-    echo "  Warning: $src_dir not found, skipping statusline file sync."
-    return 0
-  fi
-
-  mkdir -p "$dst_dir"
-
-  if [[ -f "$src_dir/ccr-statusline.ts" ]]; then
-    cp "$src_dir/ccr-statusline.ts" "$dst_dir/ccr-statusline.ts"
-  else
-    echo "  Warning: $src_dir/ccr-statusline.ts not found."
-  fi
-
-  if [[ -f "$src_dir/statusline.sh" ]]; then
-    cp "$src_dir/statusline.sh" "$dst_dir/statusline.sh"
-    chmod +x "$dst_dir/statusline.sh" 2>/dev/null || true
-  else
-    echo "  Warning: $src_dir/statusline.sh not found."
-  fi
-}
-
 install_if_missing() {
   local cmd="$1"
   local pkg="${2:-$1}"
@@ -208,7 +97,7 @@ link_file() {
   echo "  $src -> $dst"
 }
 
-# =====================
+# ====================
 # 1. Install zsh (Linux only)
 # =====================
 if [[ "$PLATFORM" == "linux" ]] && ! command_exists zsh; then
@@ -225,7 +114,7 @@ if [[ "$PLATFORM" == "linux" ]] && ! command_exists zsh; then
   fi
 fi
 
-# =====================
+# ====================
 # 2. Install Homebrew / Linuxbrew
 # =====================
 if ! command_exists brew; then
@@ -240,7 +129,7 @@ if ! setup_brew_shellenv; then
   exit 1
 fi
 
-# =====================
+# ====================
 # 3. Install core packages
 # =====================
 echo "==> Installing packages via brew..."
@@ -255,8 +144,6 @@ BREW_PACKAGES=(
   tmux
   starship
   git
-  imagemagick
-  luarocks
   nmap
   proxychains-ng
 )
@@ -264,7 +151,7 @@ for pkg in "${BREW_PACKAGES[@]}"; do
   install_if_missing "$pkg" "$pkg"
 done
 
-# =====================
+# ====================
 # 4. Symlink Zsh dotfiles
 # =====================
 echo "==> Linking Zsh dotfiles..."
@@ -278,7 +165,7 @@ mkdir -p "$HOME/.config"
 link_file "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
 link_file "$DOTFILES_DIR/.tmux.conf"    "$HOME/.tmux.conf"
 
-# =====================
+# ====================
 # 5. Install Zim framework
 # =====================
 ZIM_HOME="$HOME/.zim"
@@ -292,7 +179,7 @@ else
   zsh -c "ZIM_HOME=$ZIM_HOME source $ZIM_HOME/zimfw.zsh install"
 fi
 
-# =====================
+# ====================
 # 6. Symlink Neovim (LazyVim) config
 # =====================
 echo "==> Linking Neovim config..."
@@ -302,7 +189,7 @@ link_file "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
 echo "  lazy.nvim will auto-bootstrap on first nvim launch"
 
-# =====================
+# ====================
 # 7. Set default shell to zsh
 # =====================
 ZSH_PATH="$(command -v zsh)"

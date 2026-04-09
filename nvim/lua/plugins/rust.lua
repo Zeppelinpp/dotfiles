@@ -1,45 +1,83 @@
 return {
-  -- 1. 配置 rustaceanvim (LazyVim 官方推荐的 Rust 插件)
+  -- 1. Configure crates.nvim (Cargo.toml dependency management)
+  {
+    "Saecki/crates.nvim",
+    event = "BufRead Cargo.toml",
+    config = function()
+      require("crates").setup({
+        completion = {
+          cmp = {
+            enabled = false, -- 禁用 nvim-cmp 集成，使用 blink 的 LSP
+          },
+        },
+      })
+    end,
+  },
+
+  -- 2. Configure rustaceanvim
   {
     "mrcjkb/rustaceanvim",
-    version = "^5", -- 确保使用较新版本
-    lazy = false,
+    version = "^5",
+    ft = { "rust" },  -- 只在 Rust 文件类型时加载
     opts = {
       server = {
         default_settings = {
-          -- 这里就是原来的 rust-analyzer 配置区
           ["rust-analyzer"] = {
-            -- 【保留你之前的配置】
             diagnostics = {
               disabled = { "dead_code" },
             },
-            -- 【降温关键：关闭保存即检查】
-            -- 这样不会每次 :w 都导致 CPU 飙升
+            completion = {
+              autoimport = {
+                enable = true,
+              },
+              callable = {
+                snippets = "add_parentheses",
+              },
+              postfix = {
+                enable = false,
+              },
+            },
             checkOnSave = false,
-            -- 【降温关键：独立编译目录】
-            -- 避免 RA 和你手动执行 cargo run 产生文件锁竞争
             cargo = {
               targetDir = true,
             },
-            -- 【性能优化：限制宏展开的范围】
             procMacro = {
               enable = true,
+            },
+            cachePriming = {
+              enable = false,
             },
           },
         },
       },
     },
+    config = function(_, opts)
+      -- rustaceanvim 使用全局变量配置
+      vim.g.rustaceanvim = vim.tbl_deep_extend("force", vim.g.rustaceanvim or {}, opts)
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "rust",
+        callback = function(event)
+          vim.api.nvim_buf_create_user_command(event.buf, "LspRestart", function()
+            vim.cmd.RustAnalyzer("restart")
+          end, {
+            nargs = "*",
+            desc = "Restart rust-analyzer via rustaceanvim",
+          })
+        end,
+      })
+    end,
   },
 
-  -- 2. 告诉 lspconfig 不要去管 rust_analyzer
-  -- 这是为了防止 LazyVim 同时启动两个 LSP 导致冲突和双倍能耗
+  -- 3. Tell lspconfig not to manage rust_analyzer
   {
     "neovim/nvim-lspconfig",
     opts = {
-      setup = {
-        rust_analyzer = function()
-          return true -- 返回 true 表示跳过 lspconfig 的设置
-        end,
+      servers = {
+        rust_analyzer = {
+          enabled = false,
+          mason = false,
+        },
       },
     },
   },
