@@ -201,18 +201,6 @@ if [[ "$SHELL" != "$ZSH_PATH" ]]; then
   sudo chsh -s "$ZSH_PATH" "$(whoami)" 2>/dev/null || chsh -s "$ZSH_PATH" 2>/dev/null || true
 fi
 
-# =====================
-# 8. Sync Claude status line scripts
-# =====================
-echo "==> Syncing Claude status line scripts..."
-sync_cc_statusline_files
-
-# =====================
-# 9. Configure Claude status line
-# =====================
-echo "==> Configuring Claude status line..."
-ensure_claude_statusline_config
-
 echo ""
 echo "==> All done!"
 echo "    1. Run 'exec zsh' to start your new shell"
