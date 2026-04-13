@@ -1,4 +1,5 @@
 [[ $- != *i* ]] && return
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 # Start configuration added by Zim Framework install {{{
 #
 # User configuration sourced by interactive shells
