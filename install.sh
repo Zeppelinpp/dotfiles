@@ -35,6 +35,8 @@ setup_brew_shellenv() {
   else
     if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
       brew_bin="/home/linuxbrew/.linuxbrew/bin/brew"
+    elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
+      brew_bin="$HOME/.linuxbrew/bin/brew"
     fi
   fi
 
@@ -68,6 +70,8 @@ EOF
       cat <<'EOF'
 if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
+  eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
 fi
 EOF
     fi
