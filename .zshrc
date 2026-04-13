@@ -108,6 +108,7 @@ source ${ZIM_HOME}/init.zsh
 
 # Starship Theme - must be loaded after Zim
 eval "$(starship init zsh)"
+eval "$(zoxide init zsh)"
 # export PATH="/Users/ruipu/miniconda3/bin:$PATH"  # commented out by conda initialize
 
 # >>> conda initialize >>>
