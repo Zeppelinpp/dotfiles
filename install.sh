@@ -194,7 +194,19 @@ link_file "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 echo "  lazy.nvim will auto-bootstrap on first nvim launch"
 
 # ====================
-# 7. Set default shell to zsh
+# 7. Install local scripts
+# =====================
+echo "==> Installing local scripts..."
+
+mkdir -p "$HOME/.local/bin"
+if [[ -f "$DOTFILES_DIR/bin/square-colorscript" ]]; then
+  cp "$DOTFILES_DIR/bin/square-colorscript" "$HOME/.local/bin/square-colorscript"
+  chmod +x "$HOME/.local/bin/square-colorscript"
+  echo "  square-colorscript -> ~/.local/bin/"
+fi
+
+# ====================
+# 8. Set default shell to zsh
 # =====================
 ZSH_PATH="$(command -v zsh)"
 if [[ "$SHELL" != "$ZSH_PATH" ]]; then
