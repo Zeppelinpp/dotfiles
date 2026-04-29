@@ -9,6 +9,10 @@ return {
       if kimi_key and kimi_key ~= "" then
         vim.env.ANTHROPIC_API_KEY = kimi_key
         vim.env.ANTHROPIC_BASE_URL = "https://api.kimi.com/coding/"
+      else
+        -- If not in shell, set directly (fallback)
+        vim.env.ANTHROPIC_API_KEY = "sk-kimi-kWeSxen5qsT6BhHsfgp1XhQfVmd7jq1KA4SrrQH4qZxpE54yJ2uCP7lh5yRdOBUY"
+        vim.env.ANTHROPIC_BASE_URL = "https://api.kimi.com/coding/"
       end
       -- Ensure PATH includes claude
       vim.env.PATH = vim.env.HOME .. "/.local/bin:" .. vim.env.PATH

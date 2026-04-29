@@ -2,9 +2,21 @@ return {
   {
     "folke/snacks.nvim",
     opts = {
+      image = { enabled = true },
       picker = {
         sources = {
+          files = {
+            ignored = true,
+          },
           explorer = {
+            layout = {
+              preset = "sidebar",
+              preview = false,
+              layout = {
+                width = 35,
+                min_width = 35,
+              },
+            },
             hidden = true,
             ignored = true,
             follow_file = true,

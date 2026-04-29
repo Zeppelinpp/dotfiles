@@ -88,6 +88,16 @@ return {
         { section = "header" },
         { section = "keys", gap = 1, padding = 1 },
 
+        -- Right pane: Terminal decoration (colorful squares pattern)
+        -- square-colorscript installed at ~/.local/bin/square-colorscript
+        {
+          pane = 2,
+          section = "terminal",
+          cmd = "~/.local/bin/square-colorscript 2>/dev/null || echo '    ♦ ♦ ♦ ♦ ♦ ♦'",
+          height = 5,
+          padding = 1,
+        },
+
         -- Right pane: Recent files
         {
           pane = 2,
