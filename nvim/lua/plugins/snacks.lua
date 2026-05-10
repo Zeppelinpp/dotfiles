@@ -56,14 +56,16 @@ return {
       },
     },
     init = function()
+      local function set_picker_hls()
+        local dimmed_gray = "#5C594A"
+        vim.api.nvim_set_hl(0, "SnacksPickerGitStatusIgnored", { fg = dimmed_gray, force = true })
+        vim.api.nvim_set_hl(0, "SnacksPickerDimmed", { fg = dimmed_gray })
+        vim.api.nvim_set_hl(0, "SnacksPickerPathHidden", { fg = dimmed_gray })
+        vim.api.nvim_set_hl(0, "SnacksPickerPathIgnored", { fg = dimmed_gray, force = true })
+      end
+      set_picker_hls()
       vim.api.nvim_create_autocmd("ColorScheme", {
-        callback = function()
-          local dimmed_gray = "#5C594A"
-          vim.api.nvim_set_hl(0, "SnacksPickerGitStatusIgnored", { fg = dimmed_gray, force = true })
-          vim.api.nvim_set_hl(0, "SnacksPickerDimmed", { fg = dimmed_gray })
-          vim.api.nvim_set_hl(0, "SnacksPickerPathHidden", { fg = dimmed_gray })
-          vim.api.nvim_set_hl(0, "SnacksPickerPathIgnored", { fg = dimmed_gray, force = true })
-        end,
+        callback = set_picker_hls,
       })
     end,
   },
