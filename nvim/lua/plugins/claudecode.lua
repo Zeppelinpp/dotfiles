@@ -11,7 +11,7 @@ return {
         vim.env.ANTHROPIC_BASE_URL = "https://api.kimi.com/coding/"
       else
         -- If not in shell, set directly (fallback)
-        vim.env.ANTHROPIC_API_KEY = "sk-kimi-kWeSxen5qsT6BhHsfgp1XhQfVmd7jq1KA4SrrQH4qZxpE54yJ2uCP7lh5yRdOBUY"
+        vim.env.ANTHROPIC_API_KEY = ""
         vim.env.ANTHROPIC_BASE_URL = "https://api.kimi.com/coding/"
       end
       -- Ensure PATH includes claude

@@ -157,7 +157,6 @@ alias cc="claude --dangerously-skip-permissions"
 alias ls="eza --icons --group-directories-first"
 alias lt="eza --tree --git --icons --group-directories-first"
 alias ll="eza -lh --git --icons --group-directories-first"
-alias kimi="export ANTHROPIC_BASE_URL=https://api.kimi.com/coding/ ANTHROPIC_API_KEY=sk-kimi-kWeSxen5qsT6BhHsfgp1XhQfVmd7jq1KA4SrrQH4qZxpE54yJ2uCP7lh5yRdOBUY"
 # alias claude="proxychains4 claude"
 
 
