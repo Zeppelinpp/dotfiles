@@ -3,10 +3,19 @@ return {
     "folke/snacks.nvim",
     opts = {
       image = { enabled = true },
+      zen = {
+        toggles = {
+          dim = false,
+        },
+      },
       picker = {
         sources = {
           files = {
             ignored = true,
+            exclude = { "target/", "__pycache__/", "*.pyc", ".git/" },
+          },
+          grep = {
+            exclude = { "target/", "__pycache__/", "*.pyc", ".git/" },
           },
           explorer = {
             layout = {
